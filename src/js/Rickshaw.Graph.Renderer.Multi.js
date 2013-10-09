@@ -14,7 +14,7 @@ Rickshaw.Graph.Renderer.Multi = Rickshaw.Class.create( Rickshaw.Graph.Renderer, 
 		return Rickshaw.extend( $super(), {
 			unstack: true,
 			fill: false,
-			stroke: true 
+			stroke: true
 		} );
 	},
 
@@ -35,8 +35,13 @@ Rickshaw.Graph.Renderer.Multi = Rickshaw.Class.create( Rickshaw.Graph.Renderer, 
 
 			if (!data.length) return;
 
-			var domain = $super(data);
-			domains.push(domain);
+			if(group.renderer.name != 'scatterplot') {
+				var domain = group.renderer.domain();
+				domains.push(domain);
+			} else {
+				domains.push($super(data));
+			}
+
 		});
 
 		var xMin = d3.min(domains.map( function(d) { return d.x[0] } ));
@@ -72,7 +77,7 @@ Rickshaw.Graph.Renderer.Multi = Rickshaw.Class.create( Rickshaw.Graph.Renderer, 
 					vis: d3.select(vis)
 				};
 			}
-				
+
 			renderGroups[series.renderer].series.push(series);
 
 		}, this);

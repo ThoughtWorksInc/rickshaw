@@ -1737,14 +1737,14 @@ Rickshaw.Graph.Behavior.Series.Highlight = function(args) {
 			if (activeLine) return;
 			else activeLine = l;
 
-			self.legend.lines.forEach( function(line, index) {
+			self.legend.lines.forEach( function(line) {
 
 				if (l === line) {
 
 					// if we're not in a stacked renderer bring active line to the top
-					if (index > 0 && self.graph.renderer.unstack && (line.series.renderer ? line.series.renderer.unstack : true)) {
+					if (self.graph.renderer.unstack && (line.series.renderer ? line.series.renderer.unstack : true)) {
 
-						var seriesIndex = self.graph.series.length - index - 1;
+						var seriesIndex = self.graph.series.indexOf(line.series);
 						line.originalIndex = seriesIndex;
 
 						var series = self.graph.series.splice(seriesIndex, 1)[0];
@@ -2407,6 +2407,8 @@ Rickshaw.Graph.Renderer = Rickshaw.Class.create( {
 				if (y > yMax) yMax = y;
 			} );
 
+			if (!series.length) return;
+
 			if (series[0].x < xMin) xMin = series[0].x;
 			if (series[series.length - 1].x > xMax) xMax = series[series.length - 1].x;
 		} );
@@ -2843,7 +2845,7 @@ Rickshaw.Graph.Renderer.Multi = Rickshaw.Class.create( Rickshaw.Graph.Renderer, 
 		return Rickshaw.extend( $super(), {
 			unstack: true,
 			fill: false,
-			stroke: true 
+			stroke: true
 		} );
 	},
 
@@ -2864,8 +2866,13 @@ Rickshaw.Graph.Renderer.Multi = Rickshaw.Class.create( Rickshaw.Graph.Renderer, 
 
 			if (!data.length) return;
 
-			var domain = $super(data);
-			domains.push(domain);
+			if(group.renderer.name != 'scatterplot') {
+				var domain = group.renderer.domain();
+				domains.push(domain);
+			} else {
+				domains.push($super(data));
+			}
+
 		});
 
 		var xMin = d3.min(domains.map( function(d) { return d.x[0] } ));
@@ -2901,7 +2908,7 @@ Rickshaw.Graph.Renderer.Multi = Rickshaw.Class.create( Rickshaw.Graph.Renderer, 
 					vis: d3.select(vis)
 				};
 			}
-				
+
 			renderGroups[series.renderer].series.push(series);
 
 		}, this);
